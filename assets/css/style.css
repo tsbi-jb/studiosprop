@@ -1,0 +1,29 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f8f9fa;
+  }
+  
+  .card {
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  h2 {
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .form-group label {
+    font-weight: 500;
+  }
+  
+  #service-list .form-check {
+    margin-bottom: 0.4rem;
+  }
+  
+  #totalDisplay {
+    font-size: 1.25rem;
+    color: #28a745;
+    font-weight: 600;
+  }
+  

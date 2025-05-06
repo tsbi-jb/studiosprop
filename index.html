@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Studio Proposal Assistant</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-light">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <img src="assets/logo.png" alt="Company Logo" style="max-height: 80px; height: auto; width: auto; max-width: 170px;">
+  </div>
+  
+
+  <div class="text-center mt-4">
+    <a href="admin.php" class="btn btn-outline-secondary">Admin Login</a>
+  </div>
+  
+<div class="container mt-5 mb-5">
+  <div class="card shadow p-4">
+    <h2 class="mb-4 text-center">Create Studio Proposal</h2>
+    <form action="generate_proposal.php" method="POST" id="proposalForm">
+
+      <!-- Client Info -->
+      <div class="form-group">
+        <label>Brand Name</label>
+        <input type="text" name="client_name" class="form-control" placeholder="e.g. Zee TV, Colors, GSK..." required>
+      </div>
+
+      <div class="form-group">
+        <label>Your Email</label>
+        <input type="email" name="client_email" class="form-control" placeholder="e.g. joshua@tsbi.in" required>
+      </div>
+
+      <div class="form-group">
+        <label>Project Title</label>
+        <input type="text" name="project_title" class="form-control" placeholder="e.g. Product Launch Promo">
+      </div>
+
+      <!-- Services -->
+      <div class="form-group">
+        <label>Select Required Services</label>
+        <div id="service-list" class="pl-2">
+          <!-- Services will be injected here -->
+        </div>
+      </div>
+
+      <!-- Number of Days -->
+      <div class="form-group">
+        <label>Number of Days</label>
+        <input type="number" name="days" id="days" class="form-control" min="1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="shoot_dates"><strong>Shoot Dates</strong></label>
+        <input type="date" name="shoot_dates" id="shoot_dates" class="form-control" placeholder="e.g. 01/05/2025" required>
+      </div>
+      
+
+      <!-- Total Estimate -->
+      <div class="form-group">
+        <h5>Total Estimate: <span id="totalDisplay">₹0</span></h5>
+      </div>
+
+      <button type="submit" class="btn btn-success btn-block">Generate Proposal</button>
+    </form>
+  </div>
+</div>
+
+<script src="assets/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<?php
+include 'includes/db.php';
+
+// Get form data
+$client_name    = $_POST['client_name'] ?? '';
+$client_email   = $_POST['client_email'] ?? '';
+$project_title  = $_POST['project_title'] ?? '';
+$shoot_dates    = $_POST['shoot_dates'] ?? '';
+$days           = isset($_POST['days']) ? (int) $_POST['days'] : 1;
+$service_ids    = $_POST['services'] ?? [];
+
+$total = 0;
+$breakdown = '';
+$has_valid_data = $client_name && $client_email && !empty($service_ids);
+
+ob_start();
+?>
+
+<div style="max-width:800px; margin:40px auto; padding:30px; font-family:sans-serif; border:1px solid #ccc">
+  <h2>Proposal Summary</h2>
+  <p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
+  <p><strong>Email:</strong> <?= htmlspecialchars($client_email) ?></p>
+  <p><strong>Project Title:</strong> <?= htmlspecialchars($project_title) ?></p>
+  <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($shoot_dates) ?></p>
+  <p><strong>Duration:</strong> <?= $days ?> day(s)</p>
+  <hr>
+
+  <h4>Services Breakdown:</h4>
+  <ul>
+    <?php
+    if ($has_valid_data) {
+      foreach ($service_ids as $id) {
+        $id = (int) $id;
+        $result = $conn->query("SELECT service_name, rate_per_day FROM studio_services WHERE id = $id LIMIT 1");
+
+        if ($result && $row = $result->fetch_assoc()) {
+          $cost = $row['rate_per_day'] * $days;
+          $total += $cost;
+          $line = "{$row['service_name']} – ₹{$row['rate_per_day']} x $days = ₹{$cost}";
+          echo "<li>$line</li>";
+          $breakdown .= "<li>$line</li>";
+        }
+      }
+    } else {
+      echo "<li>Invalid or missing input data. Please go back.</li>";
+    }
+    ?>
+  </ul>
+
+  <hr>
+  <h4>Total Estimate: ₹<?= number_format($total) ?></h4>
+
+  <?php if ($has_valid_data): ?>
+    <form action="generate_pdf.php" method="POST" target="_blank">
+      <input type="hidden" name="client_name" value="<?= htmlspecialchars($client_name) ?>">
+      <input type="hidden" name="project_title" value="<?= htmlspecialchars($project_title) ?>">
+      <input type="hidden" name="shoot_dates" value="<?= htmlspecialchars($shoot_dates) ?>">
+      <input type="hidden" name="duration" value="<?= $days ?>">
+      <input type="hidden" name="summary_html" value='<?= htmlentities("<ul>{$breakdown}</ul>") ?>'>
+      <button type="submit" class="btn btn-primary mt-3">Download PDF</button>
+    </form>
+  <?php endif; ?>
+
+  <div class="mt-4">
+    <a href="index.html" class="btn btn-secondary">← Back to Form</a>
+  </div>
+</div>
+
+<?php ob_end_flush(); ?>
