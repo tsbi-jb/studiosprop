@@ -26,17 +26,44 @@
         <label>Brand Name</label>
         <input type="text" name="client_name" class="form-control" placeholder="e.g. Zee TV, Colors, GSK..." required>
       </div>
-
+      
       <div class="form-group">
         <label>Your Email</label>
-        <input type="email" name="client_email" class="form-control" placeholder="e.g. joshua@tsbi.in" required>
+        <input type="email"
+               id="client_email"
+               name="client_email"
+               class="form-control"
+               placeholder="e.g. user@tsbi.in"
+               required>
+        <small id="emailError" class="form-text text-danger" style="display: none;">
+          Only emails ending with @tsbi.in are allowed.
+        </small>
       </div>
 
       <div class="form-group">
         <label>Project Title</label>
         <input type="text" name="project_title" class="form-control" placeholder="e.g. Product Launch Promo">
       </div>
-
+      <div class="form-group">
+        <label>Category</label>
+        <select name="category[]" class="form-control"  required>
+          <option value="" disabled selected>Select a option</option>
+          <option value="Digital Bytes">Digital Bytes</option>
+          <option value="Piece to Camera">Piece to Camera</option>
+          <option value="Digital Video">Digital Video</option>
+          <option value="Behind the Scene">Behind the Scene</option>
+        </select>
+      </div>
+      
+      <!-- Location Single Select -->
+      <div class="form-group">
+        <label>Location</label>
+        <select name="location" class="form-control" required>
+          <option value="" disabled selected>Select a location</option>
+          <option value="Mumbai">Mumbai</option>
+          <option value="Outside Mumbai">Outside Mumbai</option>
+        </select>
+      </div>
       <!-- Services -->
       <div class="form-group">
         <label>Select Required Services</label>
@@ -64,6 +91,25 @@
 
       <button type="submit" class="btn btn-success btn-block">Generate Proposal</button>
     </form>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('proposalForm').addEventListener('submit', function (e) {
+          const email = document.getElementById('client_email').value.trim();
+          const isValid = /^[a-zA-Z0-9._%+-]+@tsbi\.in$/.test(email);
+          
+          if (!isValid) {
+            e.preventDefault();
+            alert("Only emails ending with @tsbi.in are allowed.");
+          }
+        });
+      });
+    </script>
+
+<script>
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('shoot_dates').setAttribute('min', today);
+</script>
+
   </div>
 </div>
 

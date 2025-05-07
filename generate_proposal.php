@@ -7,6 +7,9 @@ $client_email  = $_POST['client_email'] ?? '';
 $project_title = $_POST['project_title'] ?? '';
 $shoot_dates   = $_POST['shoot_dates'] ?? '';
 $days          = (int) ($_POST['days'] ?? 1);
+$category_arr = $_POST['category'] ?? [];
+$location = $_POST['location'] ?? '';
+$category_str = implode(', ', $category_arr);
 $service_ids   = $_POST['services'] ?? [];
 
 $total = 0;
@@ -36,10 +39,12 @@ if ($client_name && $client_email && !empty($service_ids)) {
     }
   }
 
+
+
   // Insert into database
   $services_str = strip_tags(str_replace(['<li>', '</li>'], ["", ", "], $breakdown));
-  $stmt = $conn->prepare("INSERT INTO studio_quotes (quote_id, client_name, your_email, project_title, shoot_dates, services, total, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
-  $stmt->bind_param("ssssssd", $quote_id, $client_name, $client_email, $project_title, $shoot_dates, $services_str, $total);
+  $stmt = $conn->prepare("INSERT INTO studio_quotes (quote_id, client_name, your_email, project_title, shoot_dates, services, total, category, location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  $stmt->bind_param("ssssssiss", $quote_id, $client_name, $your_email, $project_title, $shoot_dates, $services_str, $total, $category_str, $location);
   $stmt->execute();
 }
 
@@ -55,6 +60,9 @@ ob_start();
   <p><strong>Project Title:</strong> <?= htmlspecialchars($project_title) ?></p>
   <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($shoot_dates) ?></p>
   <p><strong>Number of Days:</strong> <?= $days ?></p>
+  <p><strong>Category:</strong> <?= htmlspecialchars($category_str) ?></p>
+  <p><strong>Location:</strong> <?= htmlspecialchars($location) ?></p>
+
   <hr>
 
   <h4>Services Breakdown:</h4>
@@ -68,11 +76,10 @@ ob_start();
     <input type="hidden" name="project_title" value="<?= htmlspecialchars($project_title) ?>">
     <input type="hidden" name="shoot_dates" value="<?= htmlspecialchars($shoot_dates) ?>">
     <input type="hidden" name="duration" value="<?= $days ?>">
+    <input type="hidden" name="category" value="<?= htmlspecialchars($category_str) ?>">
+  <input type="hidden" name="location" value="<?= htmlspecialchars($location) ?>">
     <input type="hidden" name="services_json" value='<?= $services_json ?>'>
     <button type="submit" class="btn btn-primary mt-3">Download PDF</button>
   </form>
-  <div class="mt-4">
-    <a href="index.html" class="btn btn-secondary">← Back to Form</a>
-  </div>
 </div>
 <?php ob_end_flush(); ?>

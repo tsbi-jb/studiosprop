@@ -1,4 +1,5 @@
 <?php
+require 'includes/db.php';
 require 'dompdf/vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -7,18 +8,46 @@ use Dompdf\Options;
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+$quote_id = $_GET['quote_id'] ?? '';
+if (!$quote_id) {
+  die("Invalid quote ID");
+}
 
-$quote_id      = $_POST['quote_id'] ?? 'TSBI-Studios-UNKNOWN';
-$client_name   = $_POST['client_name'] ?? 'N/A';
-$project_title = $_POST['project_title'] ?? 'N/A';
-$shoot_dates   = $_POST['shoot_dates'] ?? 'N/A';
-$duration      = $_POST['duration'] ?? '1';
-$category = $_POST['category'] ?? 'N/A';
-$location = $_POST['location'] ?? '';
+// Fetch quote details
+$stmt = $conn->prepare("SELECT * FROM studio_quotes WHERE quote_id = ?");
+$stmt->bind_param("s", $quote_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
-$services_json = $_POST['services_json'] ?? '[]';
-$services      = json_decode(html_entity_decode($services_json, ENT_QUOTES), true);
+if ($result->num_rows === 0) {
+  die("Quote not found.");
+}
 
+$quote = $result->fetch_assoc();
+
+// Format category if needed
+$category = $quote['category'] ?? '';
+$category_json = json_decode($category, true);
+if (is_array($category_json)) {
+  $category = implode(', ', $category_json);
+}
+
+// Services list parsing
+$services_str = $quote['services'] ?? '';
+$services = [];
+foreach (explode(',', $services_str) as $line) {
+  $line = trim($line);
+  if (preg_match('/^(.*?) – ₹(\d+)$/u', $line, $match)) {
+    $services[] = [
+      'service_name' => $match[1],
+      'rate_per_day' => 0,
+      'days' => 0,
+      'total' => (int)$match[2],
+    ];
+  }
+}
+
+// PDF generation
 $options = new Options();
 $options->set('isHtml5ParserEnabled', true);
 $options->set('isRemoteEnabled', true);
@@ -36,7 +65,6 @@ if (file_exists($logo_path)) {
 
 $service_rows = '';
 $total_amount = 0;
-
 foreach ($services as $s) {
   $name  = htmlspecialchars($s['service_name']);
   $cost  = number_format($s['total']);
@@ -49,6 +77,7 @@ ob_start();
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <style>
     body { font-family: 'DejaVu Sans', sans-serif; font-size: 13px; padding: 20px; }
     .logo { height: 60px; margin-bottom: 20px; }
@@ -69,13 +98,13 @@ ob_start();
   </div>
 
   <div class="section">
-  <p><strong>Quote ID:</strong> <?= htmlspecialchars($quote_id) ?></p>
-    <p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
-    <p><strong>Project:</strong> <?= htmlspecialchars($project_title) ?></p>
-    <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($shoot_dates) ?></p>
-    <p><strong>Duration (Days):</strong> <?= htmlspecialchars($duration) ?></p>
+    <p><strong>Quote ID:</strong> <?= htmlspecialchars($quote['quote_id']) ?></p>
+    <p><strong>Client:</strong> <?= htmlspecialchars($quote['client_name']) ?></p>
+    <p><strong>Email:</strong> <?= htmlspecialchars($quote['your_email'] ?? '') ?></p>
+    <p><strong>Project:</strong> <?= htmlspecialchars($quote['project_title']) ?></p>
+    <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($quote['shoot_dates']) ?></p>
     <p><strong>Category:</strong> <?= htmlspecialchars($category) ?></p>
-    <p><strong>Location:</strong> <?= htmlspecialchars($location) ?></p>
+    <p><strong>Location:</strong> <?= htmlspecialchars($quote['location']) ?></p>
   </div>
 
   <div class="section">
@@ -96,13 +125,11 @@ ob_start();
       </tbody>
     </table>
   </div>
-  </div>
 
   <div class="footer">
     <p><strong>Thank you,</strong><br>
     Studios Team<br>The Small Big Idea</p>
-
-    <p><em><strong>Disclaimer:</strong> The details provided in this proposal form are for preliminary reference only. All values, figures, and projections mentioned herein are tentative and subject to change. A more detailed understanding of the proposal, including specific insights and justifications, is available exclusively through the Studios Head. This document does not constitute a final agreement.</em></p>
+    <p><em><strong>Disclaimer:</strong> This is a preliminary proposal. Contact Studios Head for confirmation.</em></p>
   </div>
 </body>
 </html>
@@ -110,6 +137,6 @@ ob_start();
 $html = ob_get_clean();
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
-$dompdf->render();
-$dompdf->stream("Studio_Proposal.pdf", ["Attachment" => true]);
+$dompdf->render();      
+$dompdf->stream("{$quote['quote_id']}.pdf", ["Attachment" => true]);
 exit;
