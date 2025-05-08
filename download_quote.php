@@ -100,7 +100,7 @@ ob_start();
   <div class="section">
     <p><strong>Quote ID:</strong> <?= htmlspecialchars($quote['quote_id']) ?></p>
     <p><strong>Client:</strong> <?= htmlspecialchars($quote['client_name']) ?></p>
-    <p><strong>Email:</strong> <?= htmlspecialchars($quote['your_email'] ?? '') ?></p>
+    <p><strong>Email:</strong> <?= htmlspecialchars($quote['your_email']) ?></p>
     <p><strong>Project:</strong> <?= htmlspecialchars($quote['project_title']) ?></p>
     <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($quote['shoot_dates']) ?></p>
     <p><strong>Category:</strong> <?= htmlspecialchars($category) ?></p>
@@ -112,7 +112,7 @@ ob_start();
     <table>
       <thead>
         <tr>
-          <th colspan="3">Item</th>
+          <th colspan="3">Service Item</th>
           <th>Total</th>
         </tr>
       </thead>

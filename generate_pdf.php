@@ -10,6 +10,7 @@ error_reporting(E_ALL);
 
 $quote_id      = $_POST['quote_id'] ?? 'TSBI-Studios-UNKNOWN';
 $client_name   = $_POST['client_name'] ?? 'N/A';
+$your_email   = $_POST['your_email'] ?? 'N/A';
 $project_title = $_POST['project_title'] ?? 'N/A';
 $shoot_dates   = $_POST['shoot_dates'] ?? 'N/A';
 $duration      = $_POST['duration'] ?? '1';
@@ -71,6 +72,7 @@ ob_start();
   <div class="section">
   <p><strong>Quote ID:</strong> <?= htmlspecialchars($quote_id) ?></p>
     <p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
+    <p><strong>Email:</strong> <?= htmlspecialchars($your_email) ?></p>
     <p><strong>Project:</strong> <?= htmlspecialchars($project_title) ?></p>
     <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($shoot_dates) ?></p>
     <p><strong>Duration (Days):</strong> <?= htmlspecialchars($duration) ?></p>

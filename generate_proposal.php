@@ -3,7 +3,7 @@
 include 'includes/db.php';
 
 $client_name   = $_POST['client_name'] ?? '';
-$client_email  = $_POST['client_email'] ?? '';
+$your_email  = $_POST['your_email'] ?? '';
 $project_title = $_POST['project_title'] ?? '';
 $shoot_dates   = $_POST['shoot_dates'] ?? '';
 $days          = (int) ($_POST['days'] ?? 1);
@@ -17,9 +17,48 @@ $breakdown = '';
 $services_array = [];
 
 // Generate Quote ID
-$quote_id = 'TSBI-Studios-' . preg_replace('/\s+/', '', ucwords($client_name)) . '-' . strtoupper(uniqid());
+// Clean and format client name
+// Step 1: Clean the client name
+$formatted_name = ucwords(trim($client_name));
+$formatted_name_safe = preg_replace('/[^a-zA-Z0-9\s]/', '', $formatted_name);
+$formatted_name_safe = preg_replace('/\s+/', ' ', $formatted_name_safe);
 
-if ($client_name && $client_email && !empty($service_ids)) {
+// Step 2: Fetch last quote_id from DB
+$result = $conn->query("SELECT quote_id FROM studio_quotes WHERE quote_id LIKE '%_%_%' ORDER BY id DESC LIMIT 1");
+
+$prefix = 'AA';
+$number = 1;
+
+if ($result && $row = $result->fetch_assoc()) {
+    if (preg_match('/_(\w{2})_(\d{4})$/', $row['quote_id'], $matches)) {
+        $last_prefix = $matches[1];
+        $last_number = (int)$matches[2];
+
+        // If number < 9999, increment it
+        if ($last_number < 9999) {
+            $prefix = $last_prefix;
+            $number = $last_number + 1;
+        } else {
+            // Increment the 2-letter prefix
+            $chars = str_split($last_prefix);
+            if ($chars[1] === 'Z') {
+                $chars[0] = chr(ord($chars[0]) + 1);
+                $chars[1] = 'A';
+            } else {
+                $chars[1] = chr(ord($chars[1]) + 1);
+            }
+            $prefix = $chars[0] . $chars[1];
+            $number = 1;
+        }
+    }
+}
+
+// Step 3: Format and build the quote ID
+$new_number = str_pad($number, 4, '0', STR_PAD_LEFT);
+$quote_id = "TSBI-Studios-{$formatted_name_safe}_{$prefix}_{$new_number}";
+
+
+if ($client_name && $your_email && !empty($service_ids)) {
   foreach ($service_ids as $id) {
     $id = (int)$id;
     $result = $conn->query("SELECT service_name, rate_per_day FROM studio_services WHERE id = $id LIMIT 1");
@@ -56,7 +95,7 @@ ob_start();
   <h2>Proposal Summary</h2>
   <p><strong>Quote ID:</strong> <?= htmlspecialchars($quote_id) ?></p>
   <p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
-  <p><strong>Email:</strong> <?= htmlspecialchars($client_email) ?></p>
+  <p><strong>Email:</strong> <?= htmlspecialchars($your_email) ?></p>
   <p><strong>Project Title:</strong> <?= htmlspecialchars($project_title) ?></p>
   <p><strong>Shoot Dates:</strong> <?= htmlspecialchars($shoot_dates) ?></p>
   <p><strong>Number of Days:</strong> <?= $days ?></p>
@@ -73,6 +112,7 @@ ob_start();
   <form action="generate_pdf.php" method="POST" target="_blank">
     <input type="hidden" name="quote_id" value="<?= htmlspecialchars($quote_id) ?>">
     <input type="hidden" name="client_name" value="<?= htmlspecialchars($client_name) ?>">
+    <input type="hidden" name="your_email" value="<?= htmlspecialchars($your_email) ?>">
     <input type="hidden" name="project_title" value="<?= htmlspecialchars($project_title) ?>">
     <input type="hidden" name="shoot_dates" value="<?= htmlspecialchars($shoot_dates) ?>">
     <input type="hidden" name="duration" value="<?= $days ?>">

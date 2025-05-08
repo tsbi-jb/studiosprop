@@ -24,6 +24,9 @@ include 'includes/db.php';
   </style>
 </head>
 <body>
+   <div class="d-flex justify-content-between align-items-center mb-4">
+    <img src="assets/logo.png" alt="Company Logo" style="max-height: 80px; height: auto; width: auto; max-width: 170px;">
+  </div>
 <div class="container">
   <h3 class="text-center mb-4">TSBI Studios Admin Dashboard</h3>
   <ul class="nav nav-tabs" id="adminTab" role="tablist">

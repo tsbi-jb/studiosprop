@@ -30,8 +30,8 @@
       <div class="form-group">
         <label>Your Email</label>
         <input type="email"
-               id="client_email"
-               name="client_email"
+               id="your_email"
+               name="your_email"
                class="form-control"
                placeholder="e.g. user@tsbi.in"
                required>
@@ -75,7 +75,7 @@
       <!-- Number of Days -->
       <div class="form-group">
         <label>Number of Days</label>
-        <input type="number" name="days" id="days" class="form-control" min="1" required>
+        <input type="number" name="days" id="days" class="form-control" min="1" max="100" required>
       </div>
 
       <div class="form-group">
@@ -92,22 +92,83 @@
       <button type="submit" class="btn btn-success btn-block">Generate Proposal</button>
     </form>
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('proposalForm').addEventListener('submit', function (e) {
-          const email = document.getElementById('client_email').value.trim();
-          const isValid = /^[a-zA-Z0-9._%+-]+@tsbi\.in$/.test(email);
-          
-          if (!isValid) {
-            e.preventDefault();
-            alert("Only emails ending with @tsbi.in are allowed.");
-          }
-        });
+      document.getElementById('proposalForm').addEventListener('submit', function (e) {
+        const emailInput = document.getElementById('your_email');
+        const email = emailInput.value.trim();
+    
+        // Email validation: min 3 chars, no special chars before @, ends with @tsbi.in
+        const emailPattern = /^[a-zA-Z0-9._]{3,}@tsbi\.in$/;
+    
+        if (!emailPattern.test(email)) {
+          e.preventDefault();
+          alert("Email must:\n- End with @tsbi.in\n- Be at least 3 characters before @tsbi.in\n- Not contain special characters except . or _");
+          emailInput.classList.add('is-invalid');
+        } else {
+          emailInput.classList.remove('is-invalid');
+        }
       });
     </script>
+    
 
 <script>
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('shoot_dates').setAttribute('min', today);
+</script>
+<script>
+  document.getElementById('proposalForm').addEventListener('submit', function (e) {
+    const shootDateInput = document.getElementById('shoot_dates');
+    const shootDate = new Date(shootDateInput.value);
+    
+    const today = new Date();
+    const fyStartYear = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+    
+    const fyStart = new Date(fyStartYear, 3, 1);  // April 1
+    const fyEnd   = new Date(fyStartYear + 1, 2, 31); // March 31
+
+    if (shootDate < fyStart || shootDate > fyEnd) {
+      e.preventDefault();
+      alert("Please select a date within the current financial year: " +
+            fyStart.toLocaleDateString() + " to " + fyEnd.toLocaleDateString());
+      shootDateInput.classList.add('is-invalid');
+    } else {
+      shootDateInput.classList.remove('is-invalid');
+    }
+  });
+</script>
+
+
+<script>
+  document.getElementById('proposalForm').addEventListener('submit', function (e) {
+    const brandInput = document.querySelector('[name="client_name"]');
+    const titleInput = document.querySelector('[name="project_title"]');
+    const brand = brandInput.value.trim();
+    const title = titleInput.value.trim();
+    const pattern = /^[a-zA-Z\s&]+$/;
+
+    let errorMsg = '';
+
+    if (!pattern.test(brand)) {
+      errorMsg += "- Brand Name can only contain letters, spaces, and &\n";
+      brandInput.classList.add('is-invalid');
+    } else {
+      brandInput.classList.remove('is-invalid');
+    }
+
+    if (title && !pattern.test(title)) {
+      errorMsg += "- Project Title can only contain letters, spaces, and &\n";
+      titleInput.classList.add('is-invalid');
+    } else {
+      titleInput.classList.remove('is-invalid');
+    }
+    const checkedServices = document.querySelectorAll('input[name="services[]"]:checked');
+    if (checkedServices.length === 0) {
+      errorMsg += "- Please select at least one service\n";
+    }
+    if (errorMsg) {
+      e.preventDefault();
+      alert("Please correct the following:\n\n" + errorMsg);
+    }
+  });
 </script>
 
   </div>
