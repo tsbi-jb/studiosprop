@@ -21,11 +21,32 @@
     <h2 class="mb-4 text-center">Create Studio Proposal</h2>
     <form action="generate_proposal.php" method="POST" id="proposalForm">
 
-      <!-- Client Info -->
+      <!-- Client Info -->      
       <div class="form-group">
         <label>Brand Name</label>
-        <input type="text" name="client_name" class="form-control" placeholder="e.g. Zee TV, Colors, GSK..." required>
+        <input type="text" id="client_name" name="client_name" class="form-control"
+               placeholder="e.g. Zee TV, Colors" required>
+        <small id="nameError" class="form-text text-danger" style="display: none;">
+          Brand name must be 2–10 letters long and contain only alphabets and spaces.
+        </small>
       </div>
+      
+      <script>
+        document.getElementById('proposalForm').addEventListener('submit', function (e) {
+          const brandInput = document.getElementById('client_name');
+          const brandValue = brandInput.value.trim();
+          const error = document.getElementById('nameError');
+      
+          if (brandValue.length < 2 || brandValue.length > 10) {
+            e.preventDefault();
+            error.style.display = 'block';
+            brandInput.classList.add('is-invalid');
+          } else {
+            error.style.display = 'none';
+            brandInput.classList.remove('is-invalid');
+          }
+        });
+      </script>
       
       <div class="form-group">
         <label>Your Email</label>
